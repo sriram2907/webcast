@@ -14,6 +14,8 @@ const io = new Server(server, {
 });
 
 const roomMembers = {}; // Add this at the top of your file (outside io.on)
+const roomVideoUrls = {};
+const screenSharers = {}; // room: { hostId: string }
 
 app.use(cors());
 app.use(express.json());
@@ -30,14 +32,29 @@ io.on('connection', (socket) => {
       socket.join(room);
       socket.data.nickname = nickname;
 
-      // Add user to roomMembers
+      // Remove any existing member with the same nickname in this room
       if (!roomMembers[room]) roomMembers[room] = [];
+      roomMembers[room] = roomMembers[room].filter(
+        (member) => member.nickname !== nickname
+      );
+
+      // Add user to roomMembers
       roomMembers[room].push({ id: socket.id, nickname });
 
       // Broadcast updated member list to the room
       io.to(room).emit('room-members', roomMembers[room]);
+
+      // Send current video URL to the new user
+      if (roomVideoUrls[room]) {
+        socket.emit('video-url', roomVideoUrls[room]);
+      }
+
+      // If someone is sharing in this room, request an offer from the host
+      if (screenSharers[room] && screenSharers[room].hostId && screenSharers[room].hostId !== socket.id) {
+        io.to(screenSharers[room].hostId).emit('request-offer', { targetId: socket.id, room });
+      }
+
       console.log(`${nickname} joined room: ${room}`);
-      // Notify others in the room (optional)
       socket.to(room).emit('user-joined', { nickname, id: socket.id });
     });
   
@@ -49,9 +66,50 @@ io.on('connection', (socket) => {
         );
         // Broadcast updated member list
         io.to(room).emit('room-members', roomMembers[room]);
+        // If the host disconnects, remove screen sharing host and notify viewers
+        if (screenSharers[room] && screenSharers[room].hostId === socket.id) {
+          io.to(room).emit("stop-sharing");
+          delete screenSharers[room];
+        }
       }
       console.log('User disconnected:', socket.id);
       // Optionally: broadcast to rooms that user left
+    });
+
+    socket.on('set-video-url', ({ room, url }) => {
+      roomVideoUrls[room] = url;
+      io.to(room).emit('video-url', url);
+    });
+
+    // WebRTC signaling for screen sharing (directed by socketId)
+    socket.on("webrtc-offer", ({ room, offer, targetId }) => {
+      if (targetId) {
+        io.to(targetId).emit("webrtc-offer", { offer, fromId: socket.id });
+      } else {
+        // legacy: broadcast to all others
+        socket.to(room).emit("webrtc-offer", { offer, fromId: socket.id });
+      }
+      // Mark this socket as the host for this room
+      screenSharers[room] = { hostId: socket.id };
+    });
+
+    socket.on("webrtc-answer", ({ answer, targetId }) => {
+      if (targetId) {
+        io.to(targetId).emit("webrtc-answer", { answer, fromId: socket.id });
+      }
+    });
+
+    socket.on("webrtc-ice", ({ candidate, targetId }) => {
+      if (targetId) {
+        io.to(targetId).emit("webrtc-ice", { candidate, fromId: socket.id });
+      }
+    });
+
+    socket.on("stop-sharing", ({ room }) => {
+      if (screenSharers[room] && screenSharers[room].hostId === socket.id) {
+        socket.to(room).emit("stop-sharing");
+        delete screenSharers[room];
+      }
     });
   });
 
