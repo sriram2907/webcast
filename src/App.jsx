@@ -468,7 +468,18 @@ function App() {
           <div style={{ width: 13, height: 13, borderRadius: "50%", background: "#ffbd2e", border: "1.5px solid #dea123" }} />
           <div style={{ width: 13, height: 13, borderRadius: "50%", background: "#27c93f", border: "1.5px solid #13a10e" }} />
         </div>
-        <h1 style={{ fontFamily: 'DotGothic16, monospace', fontWeight: 400, fontSize: 32, marginBottom: 8, letterSpacing: 2, textShadow: '0 2px 8px #b3cfff' }}>Watch Party</h1>
+        <svg
+          width="48"
+          height="48"
+          viewBox="0 0 48 48"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ marginBottom: 16 }}
+        >
+          <circle cx="24" cy="24" r="22" stroke="#111" strokeWidth="4" fill="none" />
+          <text x="50%" y="60%" textAnchor="middle" fill="#111" fontSize="28" fontFamily="DotGothic16, monospace" fontWeight="bold" dominantBaseline="middle">W</text>
+        </svg>
+        <h1 style={{ fontFamily: 'DotGothic16, monospace', fontWeight: 400, fontSize: 32, marginBottom: 8, letterSpacing: 2, textShadow: '0 2px 8px #b3cfff' }}>Webcast</h1>
         {!inRoom ? (
           <>
         <input
