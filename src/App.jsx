@@ -312,7 +312,7 @@ function App() {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     color: "#222",
     transition: "background 0.3s",
     position: "relative",
@@ -388,6 +388,17 @@ function App() {
     return () => document.head.removeChild(style);
   }, []);
 
+  // Add favicon SVG W icon to the tab
+  useEffect(() => {
+    const favicon = document.createElement('link');
+    favicon.rel = 'icon';
+    favicon.type = 'image/svg+xml';
+    favicon.href =
+      'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22><circle cx=%2224%22 cy=%2224%22 r=%2222%22 stroke=%22%23111%22 stroke-width=%224%22 fill=%22none%22/><text x=%2250%25%22 y=%2260%25%22 text-anchor=%22middle%22 fill=%22%23111%22 font-size=%2228%22 font-family=%22monospace%22 font-weight=%22bold%22 dominant-baseline=%22middle%22>W</text></svg>';
+    document.head.appendChild(favicon);
+    return () => document.head.removeChild(favicon);
+  }, []);
+
     return (
     <div style={animatedBgStyle}>
       {/* Animated 3D balls */}
@@ -452,6 +463,7 @@ function App() {
           fontFamily: 'DotGothic16, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
           position: "relative",
           maxHeight: "calc(100vh - 300px)",
+          marginTop: 64,
           overflowY: "auto"
         }}
       >
