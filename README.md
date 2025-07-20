@@ -30,11 +30,7 @@ A real-time watch party web application where users can create or join rooms and
 
 ## 📸 Screenshots
 
-> _Add your actual screenshots in a `/screenshots` folder and update these links below:_
-
-![Room Interface](./screenshots/room.png)
-![Screen Sharing Demo](./screenshots/screenshare.gif)
-
+Have been added to the repo kindly check it :)
 ---
 
 ## ⚙️ Getting Started
